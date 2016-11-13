@@ -1,0 +1,18 @@
+{
+  "extends": "airbnb-base",
+
+  "plugins": [
+    "import"
+  ],
+
+  "env": {
+    "node": true
+  },
+
+  "globals": {
+  },
+
+  "rules": {
+    linebreak-style: ["error", "windows"]
+  }
+}
