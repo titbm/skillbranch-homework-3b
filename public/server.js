@@ -18,20 +18,14 @@ var CORS = require('cors');
 function searchIn(array, object) {
   var counter = 0;
   function search(arrayInner, objectInner) {
-    console.log(counter, arrayInner, objectInner);
-    console.log(arrayInner[counter] in objectInner);
     if (arrayInner[counter] in objectInner) {
-      console.log(1, true);
       if (objectInner[arrayInner[counter]] instanceof Object) {
-        console.log(2, true);
         var tempObject = (0, _assign2.default)({}, objectInner[arrayInner[counter]]);
         if (counter < arrayInner.length - 1) {
-          console.log(3, true);
           counter += 1;
           return search(arrayInner, tempObject);
         }
       }
-      console.log(counter, arrayInner.length);
       return counter === arrayInner.length - 1 ? objectInner[arrayInner[counter]] : false;
     }
     return false;
@@ -46,7 +40,6 @@ SERVER.use(CORS());
 
 SERVER.get(/^(?:\/(?:[a-z]+)?)+/, function (request, response) {
   var id = request.url.replace(/\/$/, '').substr(1).split('/');
-  console.log(id);
   _api2.default.getData().then(function (result) {
     var searchResult = !id[0] && id.length === 1 ? result : searchIn(id, result);
 
