@@ -63,6 +63,34 @@ SERVER.get('/users', function (request, response) {
   });
 });
 
+SERVER.get('/users/populate', function (request, response) {
+  var query = request.query;
+
+  _api2.default.getData().then(function (result) {
+    var filteredUsers = result.users;
+
+    filteredUsers = _.map(filteredUsers, function (user) {
+      var id = user.id;
+      var pets = _.where(result.pets, { userId: id });
+      var extendedUser = _.extend(user, { pets: pets });
+      return extendedUser;
+    });
+
+    if (query.hasOwnProperty('havePet')) {
+      (function () {
+        var filteredPets = _.where(result.pets, { type: query.havePet });
+        filteredUsers = _.filter(filteredUsers, function (user) {
+          for (var i = 0; i < filteredPets.length; i += 1) {
+            if (filteredPets[i].userId === user.id) return user;
+          }
+        });
+      })();
+    }
+
+    response.send(filteredUsers);
+  });
+});
+
 SERVER.get('/users/:id', function (request, response) {
   var id = parseInt(request.params.id, 10);
 
@@ -79,6 +107,34 @@ SERVER.get('/users/:id', function (request, response) {
     _api2.default.getData().then(function (result) {
       var user = _.findWhere(result.users, { id: id });
       if (user) {
+        response.send(user);
+      } else {
+        response.status(404).send('Not Found');
+      }
+    });
+  }
+});
+
+SERVER.get('/users/:id/populate', function (request, response) {
+  var id = parseInt(request.params.id, 10);
+
+  if (isNaN(id)) {
+    _api2.default.getData().then(function (result) {
+      var user = _.findWhere(result.users, { username: request.params.id });
+      if (user) {
+        var pets = _.where(result.pets, { userId: user.id });
+        var extendedUser = _.extend(user, { pets: pets });
+        response.send(extendedUser);
+      } else {
+        response.status(404).send('Not Found');
+      }
+    });
+  } else {
+    _api2.default.getData().then(function (result) {
+      var user = _.findWhere(result.users, { id: id });
+      if (user) {
+        var pets = _.where(result.pets, { userId: user.id });
+        var extendedUser = _.extend(user, { pets: pets });
         response.send(user);
       } else {
         response.status(404).send('Not Found');
@@ -147,14 +203,71 @@ SERVER.get('/pets', function (request, response) {
   });
 });
 
-SERVER.get('/pets/:id', function (request, response) {
-  var petsId = parseInt(request.params.id, 10);
-  _api2.default.getData().then(function (result) {
+SERVER.get('/pets/populate', function (request, response) {
+  var query = request.query;
 
-    var pets = _.where(result.pets, { id: petsId });
-    console.log(petsId, pets);
-    if (pets && pets.length === 1) {
-      response.send(pets[0]);
+  _api2.default.getData().then(function (result) {
+    var filteredPets = result.pets;
+    var users = result.users;
+
+    filteredPets = _.map(filteredPets, function (pet) {
+      var id = pet.userId;
+      var user = _.findWhere(users, { id: id });
+      var extendedPet = _.extend(pet, { user: user });
+      return extendedPet;
+    });
+
+    if (query.hasOwnProperty('type')) {
+      filteredPets = _.where(filteredPets, { type: query.type });
+    }
+
+    if (query.hasOwnProperty('age')) {
+      filteredPets = _.where(filteredPets, { age: query.age });
+    }
+
+    if (query.hasOwnProperty('color')) {
+      filteredPets = _.where(filteredPets, { color: query.color });
+    }
+
+    if (query.hasOwnProperty('age_gt')) {
+      filteredPets = _.filter(filteredPets, function (pet) {
+        return pet.age > query.age_gt;
+      });
+    }
+
+    if (query.hasOwnProperty('age_lt')) {
+      filteredPets = _.filter(filteredPets, function (pet) {
+        return pet.age < query.age_lt;
+      });
+    }
+
+    response.send(filteredPets);
+  });
+});
+
+SERVER.get('/pets/:id', function (request, response) {
+  var petId = parseInt(request.params.id, 10);
+
+  _api2.default.getData().then(function (result) {
+    var pet = _.findWhere(result.pets, { id: petId });
+    if (pet) {
+      response.send(pet);
+    } else {
+      response.status(404).send('Not Found');
+    }
+  });
+});
+
+SERVER.get('/pets/:id/populate', function (request, response) {
+  var petId = parseInt(request.params.id, 10);
+
+  _api2.default.getData().then(function (result) {
+    var pet = _.findWhere(result.pets, { id: petId });
+
+    if (pet) {
+      var user = _.findWhere(result.users, { id: pet.userId });
+      var extendedPet = _.extend(pet, { user: user });
+      response.send(extendedPet);
     } else {
       response.status(404).send('Not Found');
     }
