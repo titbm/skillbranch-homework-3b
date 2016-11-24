@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const URL_TO_GET_DATA = 'https://gist.githubusercontent.com/isuvorov/ce6b8d87983611482aac89f6d7bc0037/raw/pc.json';
+const URL_TO_GET_DATA = 'https://gist.githubusercontent.com/isuvorov/55f38b82ce263836dadc0503845db4da/raw/pets.json';
 
 const api = {
   getData() {
